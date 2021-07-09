@@ -1,0 +1,16 @@
+sudo: required
+
+dist: trusty
+
+language: node_js
+
+env:
+  - PROJECT=docker-elasticsearch-analysis TAG=7.13.3
+
+stage: build image
+script:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker build -t $PROJECT .
+  - docker tag $PROJECT $DOCKER_ORGANIZATION/$PROJECT:$TAG
+  - docker push $DOCKER_ORGANIZATION/$PROJECT:$TAG
+  - docker run --rm --entrypoint "/bin/bash" $DOCKER_ORGANIZATION/$PROJECT:$TAG -c "elasticsearch --version || exit 1"
